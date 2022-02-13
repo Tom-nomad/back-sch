@@ -1,15 +1,17 @@
 import * as mongoose from 'mongoose';
 export const EventSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  title: { type: String, required: true },
+  start: { type: Date, required: true },
+  end: { type: Date, required: true },
   description: { type: String },
-  slot: { type: String, required: true },
-  eventDate: { type: String, required: true },
+  color: { type: String },
 });
 
 export interface Event extends mongoose.Document {
   id: string;
-  name: string;
+  title: string;
+  start: Date;
+  end: Date;
   description: string;
-  slot: string;
-  eventDate: string;
+  color: string;
 }

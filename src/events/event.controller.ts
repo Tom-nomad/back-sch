@@ -16,16 +16,18 @@ export class EventsController {
 
   @Post()
   async addEvent(
-    @Body('name') eventName: string,
+    @Body('title') eventTitle: string,
+    @Body('start') eventStart: Date,
+    @Body('end') eventEnd: Date,
     @Body('description') eventDesc: string,
-    @Body('slot') eventSlot: string,
-    @Body('eventDate') eventDate: string,
+    @Body('color') eventColor: string,
   ) {
     const generatedId = await this.EventsService.insertEvent(
-      eventName,
+      eventTitle,
+      eventStart,
+      eventEnd,
       eventDesc,
-      eventSlot,
-      eventDate,
+      eventColor,
     );
     return { id: generatedId };
   }
@@ -45,17 +47,19 @@ export class EventsController {
   @Patch(':id')
   async updateEvent(
     @Param('id') eventId: string,
-    @Body('name') eventName: string,
-    @Body('description') eventDesc: string,
-    @Body('slot') eventSlot: string,
-    @Body('eventDate') eventDate: string,
+    @Body('title') eventTitle: string,
+    @Body('start') eventStart: Date,
+    @Body('end') eventEnd: Date,
+    @Body('end') eventDesc: string,
+    @Body('end') eventColor: string,
   ) {
     await this.EventsService.updateEvent(
       eventId,
-      eventName,
+      eventTitle,
+      eventStart,
+      eventEnd,
       eventDesc,
-      eventSlot,
-      eventDate,
+      eventColor,
     );
     return null;
   }

@@ -8,16 +8,18 @@ export class EventsService {
     @InjectModel('Event') private readonly eventModel: Model<Event>,
   ) {}
   async insertEvent(
-    name: string,
+    title: string,
+    start: Date,
+    end: Date,
     description: string,
-    slot: string,
-    eventDate: string,
+    color: string,
   ) {
     const newEvent = new this.eventModel({
-      name,
+      title,
+      start,
+      end,
       description,
-      slot,
-      eventDate,
+      color,
     });
     const result = await newEvent.save();
     return result.id as string;
@@ -27,10 +29,11 @@ export class EventsService {
     const events = await this.eventModel.find();
     return events.map((event) => ({
       id: event.id,
-      name: event.name,
+      title: event.title,
+      start: event.start,
+      end: event.end,
       description: event.description,
-      slot: event.slot,
-      eventDate: event.eventDate,
+      color: event.color,
     }));
   }
 
@@ -38,32 +41,37 @@ export class EventsService {
     const event = await this.findEvent(eventId);
     return {
       id: event.id,
-      name: event.name,
+      title: event.title,
+      start: event.start,
+      end: event.end,
       description: event.description,
-      slot: event.slot,
-      eventDate: event.eventDate,
+      color: event.color,
     };
   }
 
   async updateEvent(
     eventId: string,
-    name: string,
+    title: string,
+    start: Date,
+    end: Date,
     description: string,
-    slot: string,
-    eventDate: string,
+    color: string,
   ) {
     const updatedEvent = await this.findEvent(eventId);
-    if (name) {
-      updatedEvent.name = name;
+    if (title) {
+      updatedEvent.title = title;
+    }
+    if (start) {
+      updatedEvent.start = start;
+    }
+    if (end) {
+      updatedEvent.end = end;
     }
     if (description) {
       updatedEvent.description = description;
     }
-    if (slot) {
-      updatedEvent.slot = slot;
-    }
-    if (eventDate) {
-      updatedEvent.eventDate = eventDate;
+    if (color) {
+      updatedEvent.color = color;
     }
     updatedEvent.save();
   }
