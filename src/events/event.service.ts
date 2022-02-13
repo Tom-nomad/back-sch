@@ -1,41 +1,59 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { Event } from './event.model';
-
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 @Injectable()
 export class EventsService {
   private events: Event[] = [];
-
-  insertEvent(
+  constructor(
+    @InjectModel('Event') private readonly eventModel: Model<Event>,
+  ) {}
+  async insertEvent(
     name: string,
     description: string,
     slot: string,
-    eventDate: Date,
+    eventDate: string,
   ) {
-    const eventId = randomUUID();
-    const newEvent = new Event(eventId, name, description, slot, eventDate);
-    this.events.push(newEvent);
-    return eventId;
+    const newEvent = new this.eventModel({
+      name,
+      description,
+      slot,
+      eventDate,
+    });
+    const result = await newEvent.save();
+    return result.id as string;
   }
 
-  getEvents() {
-    return [...this.events];
+  async getEvents() {
+    const events = await this.eventModel.find();
+    return events.map((event) => ({
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      slot: event.slot,
+      eventDate: event.eventDate,
+    }));
   }
 
-  getOneEvent(eventId: string) {
-    const event = this.findEvent(eventId)[0];
-    return { ...event };
+  async getOneEvent(eventId: string) {
+    const event = await this.findEvent(eventId);
+    return {
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      slot: event.slot,
+      eventDate: event.eventDate,
+    };
   }
 
-  updateEvent(
+  async updateEvent(
     eventId: string,
     name: string,
     description: string,
     slot: string,
-    eventDate: Date,
+    eventDate: string,
   ) {
-    const [event, index] = this.findEvent(eventId);
-    const updatedEvent = { ...event };
+    const updatedEvent = await this.findEvent(eventId);
     if (name) {
       updatedEvent.name = name;
     }
@@ -48,20 +66,26 @@ export class EventsService {
     if (eventDate) {
       updatedEvent.eventDate = eventDate;
     }
-    this.events[index] = updatedEvent;
+    updatedEvent.save();
   }
 
-  deleteEvent(eventId: string) {
-    const index = this.findEvent(eventId)[1];
-    this.events.splice(index, 1);
+  async deleteEvent(eventId: string) {
+    const eventToDelete = await this.eventModel.deleteOne({ _id: eventId });
+    if (eventToDelete.deletedCount === 0) {
+      throw new NotFoundException('Could not find this event.');
+    }
   }
 
-  private findEvent(id: string): [Event, number] {
-    const eventIndex = this.events.findIndex((event) => event.id === id);
-    const event = this.events[eventIndex];
+  private async findEvent(id: string): Promise<Event> {
+    let event;
+    try {
+      event = await this.eventModel.findOne({ _id: id });
+    } catch (error) {
+      throw new NotFoundException('Could not find this event.');
+    }
     if (!event) {
       throw new NotFoundException('Could not find this event.');
     }
-    return [event, eventIndex];
+    return event;
   }
 }

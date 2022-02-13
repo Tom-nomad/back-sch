@@ -15,13 +15,13 @@ export class EventsController {
   constructor(private readonly EventsService: EventsService) {}
 
   @Post()
-  addEvent(
+  async addEvent(
     @Body('name') eventName: string,
     @Body('description') eventDesc: string,
     @Body('slot') eventSlot: string,
-    @Body('eventDate') eventDate: Date,
+    @Body('eventDate') eventDate: string,
   ) {
-    const generatedId = this.EventsService.insertEvent(
+    const generatedId = await this.EventsService.insertEvent(
       eventName,
       eventDesc,
       eventSlot,
@@ -31,24 +31,26 @@ export class EventsController {
   }
 
   @Get()
-  getAllEvents() {
-    return this.EventsService.getEvents();
+  async getAllEvents() {
+    const events = await this.EventsService.getEvents();
+    return events;
   }
 
   @Get(':id')
-  getEvent(@Param('id') eventId: string) {
-    return this.EventsService.getOneEvent(eventId);
+  async getEvent(@Param('id') eventId: string) {
+    const event = await this.EventsService.getOneEvent(eventId);
+    return event;
   }
 
   @Patch(':id')
-  updateEvent(
+  async updateEvent(
     @Param('id') eventId: string,
     @Body('name') eventName: string,
     @Body('description') eventDesc: string,
     @Body('slot') eventSlot: string,
-    @Body('eventDate') eventDate: Date,
+    @Body('eventDate') eventDate: string,
   ) {
-    this.EventsService.updateEvent(
+    await this.EventsService.updateEvent(
       eventId,
       eventName,
       eventDesc,
@@ -59,8 +61,8 @@ export class EventsController {
   }
 
   @Delete(':id')
-  removeEvent(@Param('id') eventId: string) {
-    this.EventsService.deleteEvent(eventId);
+  async removeEvent(@Param('id') eventId: string) {
+    await this.EventsService.deleteEvent(eventId);
     return null;
   }
 }
